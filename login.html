@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/settingController.js"></script>
+    <script src="js/login.js"></script>
+    <title>easychat</title>
+</head>
+<body>
+    <main class="login-forms">
+        <div class="container">
+            <div class="form-wrap">
+                <header class="logo">
+                    <div class="logo-name">easychat</div>
+                    <div class="logo-wrap">
+                        <img src="images/logo.png" alt="">
+                    </div>
+                </header>
+                <article class="notice">
+                    Это тестовый проект для практики в сфере взаимодействия с API сервера
+                </article>
+                <fieldset class="login-fieldset sign-up">
+                    <legend class="legend">Регистрация</legend>
+                    <form class="form" method="GET" action="index.html" name="registration">
+                        <input class="input" type="text" placeholder="Логин" name="login" value="">
+                        <input class="input" type="password" placeholder="Пароль" name="password" value="">
+                        <input class="change-button" name="changeType" type="button" value="Войти в аккаунт">
+                        <input class="submit-button" type="submit" value="Отправить">
+                    </form>
+                </fieldset>
+                <fieldset class="login-fieldset sign-in">
+                    <legend class="legend">Авторизация</legend>
+                    <form class="form" method="GET" action="index.html" name="autorisation">
+                        <input class="input" type="text" placeholder="Логин" name="login" value="">
+                        <input class="input" type="password" placeholder="Пароль" name="password" value="">
+                        <input class="change-button" name="changeType" type="button" value="Зарегистрировать аккаунт">
+                        <input class="submit-button" type="submit" value="Отправить">
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </main>
+</body>
