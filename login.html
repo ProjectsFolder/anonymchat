@@ -26,15 +26,24 @@
                     <legend class="legend">Создание чата</legend>
                     <!-- <legend class="legend">Проверка наличия чата</legend>
                     <legend class="legend">Вход в комнату</legend> -->
-                    <ol class="hint-list">
+                    <!-- <ol class="hint-list">
                         <li class="hint">Введите название комнаты</li>
                         <li class="hint">Введите ваше имя</li>
                         <li class="hint">Скопируйте ссылку с ключом</li>
-                    </ol>
+                    </ol> -->
                     <form class="form" method="GET" action="index.html" name="loginChat">
-                        <input class="input" type="text" placeholder="Имя комнаты" name="roomName" value="">
-                        <input disabled class="input" type="text" placeholder="Имя пользователя" name="userName" value="">
-                        <input disabled readonly class="input" type="text" placeholder="Ссылка" name="roomLink" value="http://">
+                        <label class="label">
+                            Название комнаты
+                            <input class="input" type="text" name="roomName" value="">
+                        </label>
+                        <label class="label">
+                            Имя пользователя
+                            <input disabled class="input" type="text" name="userName" value="">
+                        </label>
+                        <label class="label">
+                            Ссылка 
+                            <input disabled readonly class="input" type="text" name="roomLink" value="http://">
+                        </label>
                         <input disabled class="next-button" type="submit" name="nextButton" value="Далее">
                     </form>
                 </fieldset>

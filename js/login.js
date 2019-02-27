@@ -58,10 +58,25 @@ window.onload = function () {
     // let formRegister = new LoginChatForm({type:"registration",apiRoute:"register"}, 
     //     (xhr, elem) => alert("Успешно") 
     // );
+    var first = true;
 
-    let url_string = window.location.href;
-    let url = new URL(url_string);
+    let url = new URL(window.location.href);
     let key = url.searchParams.get("key");
+
+    if (key != null) {
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", SettingController.getUrl()+"api/chat/exists/"+key, true)
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+
+                    first = false;
+                    checkExistChatSuccess(xhr);
+                }
+            }
+        }
+        xhr.send();
+    }
 
     let loginChatForm = document.getElementsByName("loginChat")[0];
 
@@ -78,7 +93,10 @@ window.onload = function () {
         sessionStorage.setItem('chatname', respObj.name);
     }
 
-    function checkExistChatSuccess() {
+    function checkExistChatSuccess(xhr) {
+        let respObj = JSON.parse(xhr.response);
+        console.dir(respObj);
+
         loginChatForm.roomName.disabled = true;
         loginChatForm.userName.disabled = false;
         
@@ -86,6 +104,8 @@ window.onload = function () {
         
         sessionStorage.setItem('key', respObj.key);
         sessionStorage.setItem('chatname', respObj.name);
+
+        loginChatForm.roomName.value = respObj.name;
     }
 
     function loginChatSuccess(xhr) {
@@ -96,30 +116,19 @@ window.onload = function () {
         loginChatForm.userName.disabled = true;
         loginChatForm.roomLink.disabled = false;
 
+        if(key==null) {
+            loginChatForm.roomLink.value = url+"?key="+sessionStorage.getItem('key');
+        } else {
+            loginChatForm.roomLink.value = url;
+        }
+
         sessionStorage.setItem('username', respObj.username);
         sessionStorage.setItem('token', respObj.userid);
 
-
-        //elem.submit();
+        // elem.submit();
     }
 
-    // ВАЛИДАЦИЯ
-    loginChatForm.roomName.oninput = function () {
-        if ( loginChatForm.roomName.value.length < 3 || loginChatForm.roomName.value.length > 50 )  {
-            loginChatForm.nextButton.disabled = true;
-        } else {
-            loginChatForm.nextButton.disabled = false;
-        }
-    }
-    loginChatForm.userName.oninput = function () {
-        if (loginChatForm.userName.value.length < 3 || loginChatForm.userName.value.length > 50) {
-            loginChatForm.nextButton.disabled = true;
-        } else {
-            loginChatForm.nextButton.disabled = false;
-        }
-    }
 
-    var first = true;
 
     loginChatForm.onsubmit = function () {
 
@@ -151,8 +160,24 @@ window.onload = function () {
             xhr.send(from);
         }
 
-
-
         return false;
     }
+
+
+    // ВАЛИДАЦИЯ
+    loginChatForm.roomName.oninput = function () {
+        if ( loginChatForm.roomName.value.length < 3 || loginChatForm.roomName.value.length > 50 )  {
+            loginChatForm.nextButton.disabled = true;
+        } else {
+            loginChatForm.nextButton.disabled = false;
+        }
+    }
+    loginChatForm.userName.oninput = function () {
+        if (loginChatForm.userName.value.length < 3 || loginChatForm.userName.value.length > 50) {
+            loginChatForm.nextButton.disabled = true;
+        } else {
+            loginChatForm.nextButton.disabled = false;
+        }
+    }
+
 }
