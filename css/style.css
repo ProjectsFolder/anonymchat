@@ -112,7 +112,7 @@ body {
     top: -10rem; left: 0; right: 0; bottom: 0;
     margin: auto;
     width: 32rem;
-    height: 30rem;
+    height: 50rem;
 }
 
 .login-forms .notice {
@@ -147,6 +147,10 @@ body {
     box-shadow: 0 0 5.625rem 1.875rem rgba(0, 0, 0, 0.17); 
 }
 
+.login-forms .hint-list {
+    padding-left: 2rem;
+}
+
 .login-forms .hint {
     font-weight: normal;
     color: #7b7b7b;
@@ -169,6 +173,8 @@ body {
     border-radius: 1.5rem;
     border: 0.2rem solid #647dee;
     background-color: transparent;
+
+    transition: all 0.25s;
 }
 
 .login-forms .input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -182,6 +188,25 @@ body {
 }
 .login-forms .input:-moz-placeholder { /* Firefox 18- */
     color: #647dee;
+}
+
+.login-forms .input:disabled {
+    border-color: #999999;
+    background-color: #d3d3d3;
+    color: #999999;
+}
+
+.login-forms .input:disabled::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: #999999;
+}
+.login-forms .input:disabled::-moz-placeholder { /* Firefox 19+ */
+    color: #999999;
+}
+.login-forms .input:disabled:-ms-input-placeholder { /* IE 10+ */
+    color: #999999;
+}
+.login-forms .input:disabled:-moz-placeholder { /* Firefox 18- */
+    color: #999999;
 }
 
 .login-forms .change-button {
@@ -222,6 +247,15 @@ body {
     background-color: #647dee;
     color: white;
 }
+
+.login-forms .next-button:disabled{
+    color: #999999;
+}
+
+.login-forms .next-button:hover:disabled{
+    background-color: transparent;
+}
+
 
 /* ШАПКА */
 
