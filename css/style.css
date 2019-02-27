@@ -111,7 +111,7 @@ body {
     position: absolute;
     top: -10rem; left: 0; right: 0; bottom: 0;
     margin: auto;
-    width: 25rem;
+    width: 32rem;
     height: 30rem;
 }
 
@@ -143,37 +143,45 @@ body {
     font-size: 1.8rem;
 
     border-radius: 1.5rem;
-    background-color: #EB3349;
+    background-color: #647dee;
     box-shadow: 0 0 5.625rem 1.875rem rgba(0, 0, 0, 0.17); 
 }
 
+.login-forms .hint {
+    font-weight: normal;
+    color: #7b7b7b;
+    font-size: 1.4rem;
+    margin: 1.5rem 2rem 0;
+}
+
 .login-forms .form {
-    margin: 2rem;
-    margin-top: 1rem;
+    margin: 1rem 2rem;
 }
 
 .login-forms .input {
     font-size: 1.6rem;
-    margin-bottom: 1rem;
 
-    padding: 1rem;
-    padding-left: 0;
+    margin: 1rem 0;
 
-    border-bottom: 0.2rem solid #EB3349;
+    padding: 1.5rem 1rem;
+    width: 100%;
+
+    border-radius: 1.5rem;
+    border: 0.2rem solid #647dee;
     background-color: transparent;
 }
 
 .login-forms .input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
-    color: #EB3349;
+    color: #647dee;
 }
 .login-forms .input::-moz-placeholder { /* Firefox 19+ */
-    color: #EB3349;
+    color: #647dee;
 }
 .login-forms .input:-ms-input-placeholder { /* IE 10+ */
-    color: #EB3349;
+    color: #647dee;
 }
 .login-forms .input:-moz-placeholder { /* Firefox 18- */
-    color: #EB3349;
+    color: #647dee;
 }
 
 .login-forms .change-button {
@@ -181,9 +189,11 @@ body {
     margin: 0 auto;
     margin-top: 1rem;
 
-    color: #EB3349;
+    color: #647dee;
     font-size: 1.4rem;
     text-align: center;
+
+    font-weight: bold;
 
     background-color: transparent;
 }
@@ -192,33 +202,25 @@ body {
     color: #F45C43; 
 }
 
-.login-forms .submit-button {
+.login-forms .next-button {
     display: block;
-    margin-top: 1.5rem;
-
-    width: 100%;
-    padding: 1rem;
+    margin-left: auto;
+    padding: 1rem 2rem;
     
-    border-radius: 1.5rem;
-    border: 0.2rem solid #EB3349;
-    
-    color: #EB3349;
+    color: #647dee;
     text-transform: uppercase;
     font-weight: bold;
     
     background-color: transparent;
     cursor: pointer;
+    border-radius: 1.5rem;
 
     transition: background-color 0.25s, color 0.25s;
 }
 
-.login-forms .submit-button:hover{
-    background-color: #EB3349;
+.login-forms .next-button:hover{
+    background-color: #647dee;
     color: white;
-}
-
-.sign-up {
-    display: none;
 }
 
 /* ШАПКА */

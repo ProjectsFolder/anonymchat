@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/settingController.js"></script>
     <script src="js/login.js"></script>
-    <title>easychat</title>
+    <title>anonymchat</title>
 </head>
 <body>
     <main class="login-forms">
         <div class="container">
             <div class="form-wrap">
                 <header class="logo">
-                    <div class="logo-name">easychat</div>
+                    <div class="logo-name">anonymchat</div>
                     <div class="logo-wrap">
                         <img src="images/logo.png" alt="">
                     </div>
@@ -22,22 +22,18 @@
                 <article class="notice">
                     Это тестовый проект для практики в сфере взаимодействия с API сервера
                 </article>
-                <fieldset class="login-fieldset sign-up">
-                    <legend class="legend">Регистрация</legend>
+                <fieldset class="login-fieldset">
+                    <legend class="legend">Создание чата</legend>
+                    <legend class="legend">Проверка наличия чата</legend>
+                    <legend class="legend">Вход в комнату</legend>
+                    <h2 class="hint">1. Введите название комнаты</h2>
+                    <h2 class="hint">2. Введите ваше имя</h2>
+                    <h2 class="hint">3. Скопируйте ключ</h2>
                     <form class="form" method="GET" action="index.html" name="registration">
-                        <input class="input" type="text" placeholder="Логин" name="login" value="">
-                        <input class="input" type="password" placeholder="Пароль" name="password" value="">
-                        <input class="change-button" name="changeType" type="button" value="Войти в аккаунт">
-                        <input class="submit-button" type="submit" value="Отправить">
-                    </form>
-                </fieldset>
-                <fieldset class="login-fieldset sign-in">
-                    <legend class="legend">Авторизация</legend>
-                    <form class="form" method="GET" action="index.html" name="autorisation">
-                        <input class="input" type="text" placeholder="Логин" name="login" value="">
-                        <input class="input" type="password" placeholder="Пароль" name="password" value="">
-                        <input class="change-button" name="changeType" type="button" value="Зарегистрировать аккаунт">
-                        <input class="submit-button" type="submit" value="Отправить">
+                        <input class="input" type="text" placeholder="Имя комнаты" name="login" value="">
+                        <input class="input" type="text" placeholder="Имя пользователя" name="login" value="">
+                        <input class="input" type="text" placeholder="Ссылка" name="login" value="">
+                        <input class="next-button" type="submit" value="Далее">
                     </form>
                 </fieldset>
             </div>

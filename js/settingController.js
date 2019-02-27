@@ -5,10 +5,6 @@
             // const serverAdress = "http://localhost:52834/";
             return serverAdress;
         }
-        static getDefaultAvatar() {
-            const avatarUrl = "images/avatars/blank.jpg";
-            return avatarUrl;
-        }
         static getNumberLimitMessage() {
             const limit = 5;
             return limit; 
