@@ -1,11 +1,11 @@
-async function checkExistChat(key) {
-    let responJson = await fetch(SettingController.getUrl()+"api/chat/exists/"+key, {method: "GET"});
+async function createChat(value) {
+    let responJson = await fetch(SettingController.getUrl()+"api/chat/create/"+value, {method: "POST"});
     let json = await responJson.json();
     return json;
 }
 
-async function createChat(value) {
-    let responJson = await fetch(SettingController.getUrl()+"api/chat/create/"+value, {method: "POST"});
+async function checkExistChat(key) {
+    let responJson = await fetch(SettingController.getUrl()+"api/chat/exists/"+key, {method: "GET"});
     let json = await responJson.json();
     return json;
 }
@@ -62,6 +62,7 @@ window.onload = function () {
 
         sessionStorage.setItem('username', responJson.username);
         sessionStorage.setItem('token', responJson.token);
+        sessionStorage.setItem('chatlink', loginChatForm.roomLink.value);
 
         loginStatus = LoginStatusEnum.LOGIN_SUCCESS;
     }
@@ -71,12 +72,9 @@ window.onload = function () {
             .then(result => {
                 checkExistChatSuccess(result);
                 loginChatForm.roomName.value = result.name;
-
             });
     }
-
     loginChatForm.onsubmit = function () {
-        console.log(loginStatus);
         switch (loginStatus) {
             case LoginStatusEnum.CREATE_ROOM: {
 
@@ -103,7 +101,6 @@ window.onload = function () {
                 break;
             }
             case LoginStatusEnum.LOGIN_SUCCESS: {
-                // loginChatForm.submit();
                 window.location.replace("index.html");
                 break;
             }

@@ -7,11 +7,11 @@ window.onload = function () {
         newMessageCount: 0,
         logOut: false
     };
-    logOutListener(sessionData.token, stateTab);
+    logOutListener(stateTab);
+    roomLinkCopyListener(sessionData);
     windowBlurFocusListener(stateTab);
     getAllMessage(sessionData, stateTab);
     sendMessageListener(sessionData);
-
  }
 
 class Message {
@@ -60,7 +60,7 @@ class Message {
             allElements.time.className = "time";
             allElements.time.textContent = `${formatDateTime(dateObj.getHours())}:${formatDateTime(dateObj.getMinutes())}`;
             allElements.date.className = "date";
-            allElements.date.textContent = `${formatDateTime(dateObj.getDate()+1)}.${formatDateTime(dateObj.getMonth())}.${formatDateTime(dateObj.getFullYear())}`;
+            allElements.date.textContent = `${formatDateTime(dateObj.getDate())}.${formatDateTime(dateObj.getMonth()+1)}.${formatDateTime(dateObj.getFullYear())}`;
             allElements.textMessage.className = "text";
             allElements.textMessage.textContent = self.text;
 
@@ -247,12 +247,14 @@ function loadSessionData() {
     let sessionKey = window.sessionStorage.getItem('key');
     let sessionUsername = window.sessionStorage.getItem('username');
     let sessionChatname = window.sessionStorage.getItem('chatname');
+    let sessionChatlink = window.sessionStorage.getItem('chatlink');
 
     return {
         token:  sessionToken,
         key:  sessionKey,
         username: sessionUsername,
-        chatname: sessionChatname
+        chatname: sessionChatname,
+        chatlink: sessionChatlink
     }
 }
 
@@ -264,12 +266,25 @@ function loadUserData(username, chatname) {
     tabItem.textContent = chatname;
 }
 
-function logOutListener(token, state) {
+function logOutListener(state) {
     let logOut = document.querySelector(".nav-item.log-out");
     logOut.addEventListener("click", function() {
         state.islogOut = true;
         window.sessionStorage.clear();
         window.location.reload();
+    });
+}
+
+function roomLinkCopyListener(sessionData) {
+    let tabItem = document.querySelector(".tab-item");
+    tabItem.addEventListener("click", function() {
+        navigator.clipboard.writeText(sessionData.chatlink)
+        .then(() => {
+            alert("Ссылка на комнату успешно скопирована")
+        })
+        .catch(err => {
+          console.log('Произошёл сбой при копировании ссылки на комнату', err);
+        });
     });
 }
 
