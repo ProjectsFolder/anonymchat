@@ -1,163 +1,92 @@
-class LoginChatForm {
-    constructor(options, callback) {
-
-        let fieldsetRegister = document.querySelector(".login-fieldset.sign-up");
-        let fieldsetLogin = document.querySelector(".login-fieldset.sign-in");
-
-        let elem = document.getElementsByName(options.type)[0];
-
-        elem.onsubmit = function() {
-            let form = new FormData(elem);
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", SettingController.getUrl() + "api/users/"+options.apiRoute, true);
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200)
-                    {
-                        callback(xhr, elem);
-                    } else {
-                        alert(xhr.status+": "+xhr.statusText);
-                    }
-                }
-            }; 
-            xhr.send(form);
-            return false;
-        }    
-        elem.elements.changeType.onclick = function() {
-            // switch (options.type) {
-            //     case "registration": {
-            //         fieldsetRegister.style.display = "none";
-            //         fieldsetLogin.style.display = "block";
-            //         break;
-            //     }
-            //     case "autorisation": {
-            //         fieldsetRegister.style.display = "block";
-            //         fieldsetLogin.style.display = "none";
-            //         break;
-            //     }
-            // }
-        }
-    }
+async function checkExistChat(key) {
+    let responJson = await fetch(SettingController.getUrl()+"api/chat/exists/"+key, {method: "GET"});
+    let json = await responJson.json();
+    return json;
 }
 
-async function getProducts() {
-    let responseProducts = await fetch('http://localhost:8090/products');
-    let products = await responseProducts.json(); // will not work without "await" word
+async function createChat(value) {
+    let responJson = await fetch(SettingController.getUrl()+"api/chat/create/"+value, {method: "POST"});
+    let json = await responJson.json();
+    return json;
+}
 
-    await new Promise((resolve, reject) => setTimeout(resolve, 3000)); // this works like Sleep(3000) in threads
-    console.log(JSON.stringify(products, '', ' '));
-    let responseFirstProduct = await fetch('http://localhost:8090/products/1');
-    let firstProduct = await responseFirstProduct.json();
-    console.log(JSON.stringify(firstProduct, '', ' '));
-    return products;
-  }
-//   getProducts();
+async function loginChat(key, data) {
+    let responJson = await fetch(SettingController.getUrl()+"api/user/login/"+key, {method: "POST", body: data});
+    
+    if (responJson.ok) {
+        let json = await responJson.json();
+        return json;
+    } else {
+        throw new Error(responJson.status +  ": " + responJson.statusText);
+    }
 
+}
 
 window.onload = function () {
-    // let formRegister = new LoginChatForm({type:"registration",apiRoute:"register"}, 
-    //     (xhr, elem) => alert("Успешно") 
-    // );
     var first = true;
 
     let url = new URL(window.location.href);
     let key = url.searchParams.get("key");
 
-    if (key != null) {
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", SettingController.getUrl()+"api/chat/exists/"+key, true)
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-
-                    first = false;
-                    checkExistChatSuccess(xhr);
-                }
-            }
-        }
-        xhr.send();
-    }
-
     let loginChatForm = document.getElementsByName("loginChat")[0];
 
-    function createChatSusccess(xhr) {
-        let respObj = JSON.parse(xhr.response);
-        console.dir(respObj);
 
-        loginChatForm.roomName.disabled = true;
-        loginChatForm.userName.disabled = false;
-        
-        loginChatForm.nextButton.disabled = true;
-
-        sessionStorage.setItem('key', respObj.key);
-        sessionStorage.setItem('chatname', respObj.name);
-    }
-
-    function checkExistChatSuccess(xhr) {
-        let respObj = JSON.parse(xhr.response);
-        console.dir(respObj);
-
+    function checkExistChatSuccess(responJson) {
         loginChatForm.roomName.disabled = true;
         loginChatForm.userName.disabled = false;
         
         loginChatForm.nextButton.disabled = true;
         
-        sessionStorage.setItem('key', respObj.key);
-        sessionStorage.setItem('chatname', respObj.name);
+        sessionStorage.setItem('key', responJson.key);
+        sessionStorage.setItem('chatname', responJson.name);
 
-        loginChatForm.roomName.value = respObj.name;
     }
 
-    function loginChatSuccess(xhr) {
-        let respObj = JSON.parse(xhr.response);
-        console.dir(respObj);
-
+    function loginChatSuccess(responJson) {
         loginChatForm.roomName.disabled = true;
         loginChatForm.userName.disabled = true;
         loginChatForm.roomLink.disabled = false;
 
         if(key==null) {
-            loginChatForm.roomLink.value = url+"?key="+sessionStorage.getItem('key');
+            key = sessionStorage.getItem('key');
+            loginChatForm.roomLink.value = url+"?key="+key;
         } else {
             loginChatForm.roomLink.value = url;
         }
 
-        sessionStorage.setItem('username', respObj.username);
-        sessionStorage.setItem('token', respObj.userid);
+        sessionStorage.setItem('username', responJson.username);
+        sessionStorage.setItem('token', responJson.userid);
 
         // elem.submit();
     }
 
-
+    if (key != null) {
+        checkExistChat(key)
+            .then(result => {
+                first = false;
+                checkExistChatSuccess(result);
+                loginChatForm.roomName.value = result.name;
+            });
+    }
 
     loginChatForm.onsubmit = function () {
 
         if(first) {
-            let xhr = new XMLHttpRequest();
-            xhr.open("POST", SettingController.getUrl()+"api/chat/create/"+loginChatForm.roomName.value, true)
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        createChatSusccess(xhr);
-                        first = false;
-                    }
-                }
-            }
-            xhr.send();
+            createChat(loginChatForm.roomName.value)
+                .then(result => {
+                    first = false;
+                    checkExistChatSuccess(result);
+                });
         } else {
-            let from = new FormData();
-            from.append("name", loginChatForm.userName.value);
+            let data = new FormData();
+            data.append("name", loginChatForm.userName.value);
 
-            let xhr = new XMLHttpRequest();
-            xhr.open("POST", SettingController.getUrl()+"api/user/login/"+sessionStorage.getItem('key'), true)
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        loginChatSuccess(xhr);
-                    }
-                }
-            }
-            xhr.send(from);
+            loginChat(key, data)
+                .then(result => {
+                    loginChatSuccess(result);
+                }, reject => {
+                    alert(reject);   
+                });
         }
 
         return false;
