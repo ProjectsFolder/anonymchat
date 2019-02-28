@@ -19,11 +19,16 @@ async function loginChat(key, data) {
     } else {
         throw new Error(responJson.status +  ": " + responJson.statusText);
     }
-
 }
 
+let LoginStatusEnum = {
+        CREATE_ROOM: 0,
+        CHECK_LOGIN_ROOM: 1,
+        LOGIN_SUCCESS: 2
+    }
+
 window.onload = function () {
-    var first = true;
+    let loginStatus = LoginStatusEnum.CREATE_ROOM;
 
     let url = new URL(window.location.href);
     let key = url.searchParams.get("key");
@@ -40,6 +45,7 @@ window.onload = function () {
         sessionStorage.setItem('key', responJson.key);
         sessionStorage.setItem('chatname', responJson.name);
 
+        loginStatus = LoginStatusEnum.CHECK_LOGIN_ROOM;
     }
 
     function loginChatSuccess(responJson) {
@@ -55,38 +61,52 @@ window.onload = function () {
         }
 
         sessionStorage.setItem('username', responJson.username);
-        sessionStorage.setItem('token', responJson.userid);
+        sessionStorage.setItem('token', responJson.token);
 
-        // elem.submit();
+        loginStatus = LoginStatusEnum.LOGIN_SUCCESS;
     }
 
     if (key != null) {
         checkExistChat(key)
             .then(result => {
-                first = false;
                 checkExistChatSuccess(result);
                 loginChatForm.roomName.value = result.name;
+
             });
     }
 
     loginChatForm.onsubmit = function () {
+        console.log(loginStatus);
+        switch (loginStatus) {
+            case LoginStatusEnum.CREATE_ROOM: {
 
-        if(first) {
-            createChat(loginChatForm.roomName.value)
-                .then(result => {
-                    first = false;
-                    checkExistChatSuccess(result);
-                });
-        } else {
-            let data = new FormData();
-            data.append("name", loginChatForm.userName.value);
+                createChat(loginChatForm.roomName.value)
+                    .then(result => {
+                        checkExistChatSuccess(result);
+                    });
 
-            loginChat(key, data)
-                .then(result => {
-                    loginChatSuccess(result);
-                }, reject => {
-                    alert(reject);   
-                });
+                break;
+            }
+            case LoginStatusEnum.CHECK_LOGIN_ROOM: {
+                let data = new FormData();
+                data.append("name", loginChatForm.userName.value);
+    
+                loginChat(sessionStorage.getItem("key"), data)
+                    .then(result => {
+                        loginChatSuccess(result);
+
+                        loginStatus = LoginStatusEnum.LOGIN_SUCCESS;
+                    }, reject => {
+                        alert(reject);   
+                    });
+
+                break;
+            }
+            case LoginStatusEnum.LOGIN_SUCCESS: {
+                // loginChatForm.submit();
+                window.location.replace("index.html");
+                break;
+            }
         }
 
         return false;

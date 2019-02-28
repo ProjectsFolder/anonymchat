@@ -286,7 +286,7 @@ body {
 }
 
 .menu .profile {
-    color: #f99a5f;
+    color: #734c9d;
     font-weight: bold;
 }
 
@@ -383,11 +383,11 @@ body {
 }
 
 .message-list .accept .nickname {
-    color: #6055b0;
+    color: #647dee;
 }
 
 .message-list .sent .nickname {
-    color: #647dee;
+    color: #6055b0;
 }
 
 .message-list .date-time {
