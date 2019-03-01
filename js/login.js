@@ -21,12 +21,6 @@ async function loginChat(key, data) {
     }
 }
 
-let LoginStatusEnum = {
-        CREATE_ROOM: 0,
-        CHECK_LOGIN_ROOM: 1,
-        LOGIN_SUCCESS: 2
-    }
-
 class LoginChatForm {
     constructor() {
         this.state1 = new InputRoomState(this);
@@ -51,6 +45,9 @@ class LoginChatForm {
     setState(state){
         this.currentState = state;
         this._setInputAccessibility(state);
+    }
+    getState() {
+        return this.currentState.nameState;
     }
     inputRoom() {
         this.currentState.inputRoom();
@@ -88,6 +85,7 @@ class ChatStateBase{
 class InputRoomState extends ChatStateBase{
     constructor(chat){
         super(chat);
+        this.nameState = "inputRoomState";
         this.roomnameIsDisabled = false;
         this.usernameIsDisabled = true;
         this.roomlinkIsDisabled = true;
@@ -120,6 +118,7 @@ class InputRoomState extends ChatStateBase{
 class InputUserState extends ChatStateBase{
     constructor(chat){
         super(chat);
+        this.nameState = "inputUserState";
         this.roomnameIsDisabled = true;
         this.usernameIsDisabled = false;
         this.roomlinkIsDisabled = true;
@@ -166,6 +165,7 @@ class InputUserState extends ChatStateBase{
 class InputLinkState extends ChatStateBase{
     constructor(chat){
         super(chat);
+        this.nameState = "inputLinkState";
         this.roomnameIsDisabled = true;
         this.usernameIsDisabled = true;
         this.roomlinkIsDisabled = false;
@@ -181,8 +181,6 @@ class InputLinkState extends ChatStateBase{
 }
 
 window.onload = function () {
-    let loginStatus = LoginStatusEnum.CREATE_ROOM;
-
     let url = new URL(window.location.href);
     let key = url.searchParams.get("key");
 
@@ -190,18 +188,16 @@ window.onload = function () {
 
     let loginChatForm = document.getElementsByName("loginChat")[0];
     loginChatForm.onsubmit = function () {
-        switch (loginStatus) {
-            case LoginStatusEnum.CREATE_ROOM: {
+        switch (loginChatFormObject.getState()) {
+            case "inputRoomState": {
                 loginChatFormObject.inputRoom();
-                loginStatus = LoginStatusEnum.CHECK_LOGIN_ROOM;
                 break;
             }
-            case LoginStatusEnum.CHECK_LOGIN_ROOM: {
+            case "inputUserState": {
                 loginChatFormObject.inputUsername();
-                loginStatus = LoginStatusEnum.LOGIN_SUCCESS;
                 break;
             }
-            case LoginStatusEnum.LOGIN_SUCCESS: {
+            case "inputLinkState": {
                 loginChatFormObject.inputLink();
                 break;
             }
