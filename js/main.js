@@ -1,17 +1,4 @@
 window.onload = function () {
-
-    var source = document.getElementById("entry-template").innerHTML;
-    var template = Handlebars.compile(source);
-
-    var context = {
-        messageType: "accept", 
-        nickname: "TRIKE94",
-        date: "01.01.1970",
-        time: "12:12",
-        text: "This is my first post!"
-    };
-    var html = template(context);
-    
     let sessionData = loadSessionData();
     loadUserData(sessionData.username, sessionData.chatname);
     let stateTab = {
@@ -30,67 +17,32 @@ class Message {
     constructor(options) {
         this._elem;
 
+        this.template = options.template;
         this.username = options.username;
         this.text = options.text;
         this.time = options.time;
         this.usernameFromToken = options.usernameFromToken;
     }
     render() {
-        
-        let allElements =  createAllElements(this._elem);
-        allElements = setAllProperties(allElements, this);
-        allElements = appendAllChild(allElements);
+        var html = this.template(getContext(this));
+        this._elem = html;
 
-        this._elem = allElements.elem;
-
-        function createAllElements(elem) {
-            return {
-                elem: document.createElement("article"),
-                headerMessage: document.createElement("header"),
-                aboutInfo: document.createElement("div"),
-                nickname: document.createElement("div"),
-                dateTime: document.createElement("div"),
-                time: document.createElement("time"),
-                date: document.createElement("time"),
-                textMessage: document.createElement("div")
-            }
-        }
-        
-        function setAllProperties(allElements, self) {
-            allElements.elem.className = "message depth-effect";
+        function getContext(self) {
             let messageType = getMessageType(self);
-            allElements.elem.classList.add(messageType);
-            
-            allElements.headerMessage.className = "header-message";
-     
-            allElements.aboutInfo.className = "about-info";
-            allElements.nickname.className = "nickname";
-            allElements.nickname.textContent = self.username;
-            allElements.dateTime.className = "date-time";
-
+            let nickname = self.username;
             let dateObj = new Date(self.time*1000);
-            allElements.time.className = "time";
-            allElements.time.textContent = `${formatDateTime(dateObj.getHours())}:${formatDateTime(dateObj.getMinutes())}`;
-            allElements.date.className = "date";
-            allElements.date.textContent = `${formatDateTime(dateObj.getDate())}.${formatDateTime(dateObj.getMonth()+1)}.${formatDateTime(dateObj.getFullYear())}`;
-            allElements.textMessage.className = "text";
-            allElements.textMessage.textContent = self.text;
-
-            return allElements;
+            let time = `${formatDateTime(dateObj.getHours())}:${formatDateTime(dateObj.getMinutes())}`;
+            let date = `${formatDateTime(dateObj.getDate())}.${formatDateTime(dateObj.getMonth()+1)}.${formatDateTime(dateObj.getFullYear())}`;
+            let text = self.text;
+    
+            return {
+                messageType,
+                nickname,
+                date,
+                time,
+                text,
+            };
         }
-
-        function appendAllChild(allElements) {
-            allElements.elem.appendChild(allElements.headerMessage);
-            allElements.headerMessage.appendChild(allElements.aboutInfo);
-            allElements.aboutInfo.appendChild(allElements.nickname);
-            allElements.aboutInfo.appendChild(allElements.dateTime);
-            allElements.dateTime.appendChild(allElements.time);
-            allElements.dateTime.appendChild(allElements.date);
-            allElements.elem.appendChild(allElements.textMessage);
-
-            return allElements;
-        }
-
         function getMessageType(self) {
             return (self.usernameFromToken ===  self.username) ? "sent" : "accept";
         }
@@ -159,20 +111,20 @@ function showMissedMessage(state){
     }
 }
 
-function getNewMessage(sessionData, lastMessageTime, messageList, state) {
+function getNewMessage(sessionData, lastMessageTime, messageList, template, state) {
 
     let headers = new Headers();
     headers.append("X-AUTH-TOKEN", sessionData.token)
 
     fetch(SettingController.getUrl()+"api/message/"+sessionData.key, {
-        method: "GET", 
+        method: "GET",
         headers})
         .then( response => response.json(), 
                 reject => {
                     if (state.islogOut == true) {
                         return;
                     } else {
-                        alert(`Возникла ошибка: ${reject.statusText}`);
+                        console.log(`Возникла ошибка: ${reject}`);
                     }
                 })
         .then( responJson => {
@@ -190,6 +142,7 @@ function getNewMessage(sessionData, lastMessageTime, messageList, state) {
 
                 if (lastMessageTime != lastItem.id) {
                     let message = new Message({
+                        template: template,
                         username: lastItem.author,
                         text: lastItem.text,
                         time: lastItem.timecreated ,
@@ -198,7 +151,7 @@ function getNewMessage(sessionData, lastMessageTime, messageList, state) {
 
                     lastMessageTime = lastItem.id;
 
-                    messageList.appendChild(message.getElem());
+                    messageList.insertAdjacentHTML("beforeEnd", message.getElem());
 
                     let from = messageList.scrollTop; 
                     let to = messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight;
@@ -213,11 +166,14 @@ function getNewMessage(sessionData, lastMessageTime, messageList, state) {
                 if (e.name !== "TypeError")
                     alert(e);
             }
-            getNewMessage(sessionData, lastMessageTime, messageList, state);
+            getNewMessage(sessionData, lastMessageTime, messageList, template, state);
         })
 }
 
 function getAllMessage(sessionData, state) {
+    var source = document.getElementById("entry-template").innerHTML;
+    var template = Handlebars.compile(source);
+
     let messageList = document.querySelector(".message-list");
     let lastMessageTime;
 
@@ -231,6 +187,7 @@ function getAllMessage(sessionData, state) {
         .then( responJson => {
             responJson.forEach(item => {
                 let message = new Message({
+                    template: template,
                     username: item.author,
                     text: item.text,
                     time: item.timecreated ,
@@ -239,11 +196,11 @@ function getAllMessage(sessionData, state) {
 
                 lastMessageTime = item.id;
 
-                messageList.appendChild(message.getElem());
+                messageList.insertAdjacentHTML("beforeEnd", message.getElem());
                 messageList.scrollTop  = messageList.scrollHeight;
             });
 
-            getNewMessage(sessionData, lastMessageTime, messageList, state);
+            getNewMessage(sessionData, lastMessageTime, messageList, template, state);
         });
 
 }
