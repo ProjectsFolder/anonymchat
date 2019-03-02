@@ -102,7 +102,6 @@ body {
 /*  АВТОРИЗАЦИЯ */
 .login-forms {
     position: relative;
-    width: 100%;
     height: 100%;
     margin: -1.6rem;
 }
@@ -443,17 +442,8 @@ body {
 
     /* ШАПКА */
 
-    .header .container{
-        display: flex;
-    }
-
     .header .menu {
-        order: 1;
         margin-right: auto;
-    }
-
-    .header .logo {
-        order: 2;
     }
 
     .header .logo .logo-name {
