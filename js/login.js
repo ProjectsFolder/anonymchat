@@ -1,13 +1,11 @@
-async function createChat(value) {
-    let responJson = await fetch(SettingController.getUrl()+"api/chat/create/"+value, {method: "POST"});
-    let json = await responJson.json();
-    return json;
-}
-
-async function checkExistChat(key) {
-    let responJson = await fetch(SettingController.getUrl()+"api/chat/exists/"+key, {method: "GET"});
-    let json = await responJson.json();
-    return json;
+async function createOrExistChat(route, value, method) {
+    let responJson = await fetch(SettingController.getUrl()+"api/chat/"+route+"/"+value, {method: method});
+    if (responJson.ok) {
+        let json = await responJson.json();
+        return json;
+    } else {
+        throw new Error(responJson.status +  ": " + responJson.statusText);
+    }
 }
 
 async function loginChat(key, data) {
@@ -22,20 +20,23 @@ async function loginChat(key, data) {
 }
 
 class LoginChatForm {
-    constructor() {
+    constructor(formDOMElem) {
+        this.formDOMElem = formDOMElem;
         this.state1 = new InputRoomState(this);
         this.state2 = new InputUserState(this);
         this.state3 = new InputLinkState(this);
 
         this.roomname = "";
         this.username = "";
-        this.linkchat = "";
+        this.roomlink = "";
 
         this._setInputAccessibility = function (state){
-            let loginChatForm = document.getElementsByName("loginChat")[0];
-            loginChatForm.roomName.disabled = state.roomnameIsDisabled;
-            loginChatForm.userName.disabled = state.usernameIsDisabled;
-            loginChatForm.roomLink.disabled = state.roomlinkIsDisabled;
+            this.formDOMElem.roomName.disabled = true;
+            this.formDOMElem.userName.disabled = true;
+            this.formDOMElem.roomLink.disabled = true;
+
+            state.inputObject.disabled = false;
+            state.inputObject.focus();
         }
 
         this.currentState = this.state1;
@@ -49,11 +50,11 @@ class LoginChatForm {
     getState() {
         return this.currentState.nameState;
     }
-    inputRoom() {
-        this.currentState.inputRoom();
+    inputRoom(route, value, method) {
+        this.currentState.inputRoom(route, value, method);
     }
-    inputUsername() {
-        this.currentState.inputUser();
+    inputUsername(url, key) {
+        this.currentState.inputUser(url, key);
     }
     inputLink() {
         this.currentState.inputLink();
@@ -62,7 +63,6 @@ class LoginChatForm {
         window.location.replace("index.html");
     }
 }
-    
 
 class ChatStateBase{
 	constructor(chat){
@@ -86,27 +86,28 @@ class InputRoomState extends ChatStateBase{
     constructor(chat){
         super(chat);
         this.nameState = "inputRoomState";
-        this.roomnameIsDisabled = false;
-        this.usernameIsDisabled = true;
-        this.roomlinkIsDisabled = true;
+        this.inputObject = this.chat.formDOMElem.roomName;
 
-        this._checkExistChatSuccess = function(responJson, loginChatForm) {
-            loginChatForm.userName.focus();
-            // loginChatForm.nextButton.disabled = true;
+        this._checkExistChatSuccess = function(responJson) {
+            this.chat.formDOMElem.roomName.value = responJson.name;
+            this.chat.formDOMElem.nextButton.disabled = true;
     
             sessionStorage.setItem('key', responJson.key);
             sessionStorage.setItem('chatname', responJson.name);
         }
 	}
-	inputRoom(){
-        let loginChatForm = document.getElementsByName("loginChat")[0];
+	inputRoom(route, value, method){
+        let loginChatForm = this.chat.formDOMElem;
         let newRoomName = loginChatForm.roomName.value;
 
         this.chat.roomname = newRoomName;
 
-        createChat(newRoomName)
+        if (value === undefined) {
+            value = newRoomName;
+        }
+        createOrExistChat(route, value, method)
                     .then(result => {
-                        this._checkExistChatSuccess(result, loginChatForm);
+                        this._checkExistChatSuccess(result);
                         this.chat.setState(this.chat.state2);
                     });
     }
@@ -119,29 +120,23 @@ class InputUserState extends ChatStateBase{
     constructor(chat){
         super(chat);
         this.nameState = "inputUserState";
-        this.roomnameIsDisabled = true;
-        this.usernameIsDisabled = false;
-        this.roomlinkIsDisabled = true;
+        this.inputObject = this.chat.formDOMElem.userName;
 
-        this._loginChatSuccess = function (responJson, loginChatForm){
-            loginChatForm.roomLink.focus();
-    
-            sessionStorage.setItem('username', responJson.username);
-            sessionStorage.setItem('token', responJson.token);
-            sessionStorage.setItem('chatlink', loginChatForm.roomLink.value);
-
-
-            let key = null;
+        this._loginChatSuccess = function (responJson, url, key){
             if(key==null) {
                 key = sessionStorage.getItem('key');
-                loginChatForm.roomLink.value = url+"?key="+key;
+                this.chat.formDOMElem.roomLink.value = url+"?key="+key;
             } else {
-                loginChatForm.roomLink.value = url;
+                this.chat.formDOMElem.roomLink.value = url;
             }
+            
+            sessionStorage.setItem('username', responJson.username);
+            sessionStorage.setItem('token', responJson.token);
+            sessionStorage.setItem('chatlink', this.chat.formDOMElem.roomLink.value);
         }
     }
-	inputUser(){
-        let loginChatForm = document.getElementsByName("loginChat")[0];
+	inputUser(url, key){
+        let loginChatForm = this.chat.formDOMElem;
         let newUsername = loginChatForm.userName.value;
   
         this.chat.username = newUsername;
@@ -150,7 +145,7 @@ class InputUserState extends ChatStateBase{
         data.append("name", newUsername);
         loginChat(sessionStorage.getItem("key"), data)
             .then(result => {
-                this._loginChatSuccess(result,loginChatForm);
+                this._loginChatSuccess(result, url, key);
                 this.chat.setState(this.chat.state3);
 
             }, reject => {
@@ -166,15 +161,14 @@ class InputLinkState extends ChatStateBase{
     constructor(chat){
         super(chat);
         this.nameState = "inputLinkState";
-        this.roomnameIsDisabled = true;
-        this.usernameIsDisabled = true;
-        this.roomlinkIsDisabled = false;
+        this.inputObject = this.chat.formDOMElem.roomLink;
+
     }
     
 	inputLink(){
         let loginChatForm = document.getElementsByName("loginChat")[0];
         let newLinkChat = loginChatForm.roomLink.value;
-        this.chat.linkchat = newLinkChat;
+        this.chat.roomlink = newLinkChat;
         
         this.chat.startChat();
 	}
@@ -184,37 +178,39 @@ window.onload = function () {
     let url = new URL(window.location.href);
     let key = url.searchParams.get("key");
 
-    loginChatFormObject = new LoginChatForm();
+    let loginformDOMElem = document.getElementsByName("loginChat")[0];
 
-    let loginChatForm = document.getElementsByName("loginChat")[0];
-    loginChatForm.onsubmit = function () {
-        switch (loginChatFormObject.getState()) {
+    loginChatForm = new LoginChatForm(loginformDOMElem);
+    let chatFormDOM = loginChatForm.formDOMElem;
+    if (key) {
+        loginChatForm.inputRoom("exists",key,"GET");
+    }
+    chatFormDOM.onsubmit = function () {
+        switch (loginChatForm.getState()) {
             case "inputRoomState": {
-                loginChatFormObject.inputRoom();
+                loginChatForm.inputRoom("create",undefined,"POST");
                 break;
             }
             case "inputUserState": {
-                loginChatFormObject.inputUsername();
+                loginChatForm.inputUsername(url, key);
                 break;
             }
             case "inputLinkState": {
-                loginChatFormObject.inputLink();
+                loginChatForm.inputLink();
                 break;
             }
         }
         return false;
     }
-
-
     // // ВАЛИДАЦИЯ
-    // loginChatForm.roomName.oninput = loginChatForm.userName.oninput = function (event) {
-    //     let target = event.target;
-
-    //     if ( target.value.length < 3 || target.value.length > 50 )  {
-    //         loginChatForm.nextButton.disabled = true;
-    //     } else {
-    //         loginChatForm.nextButton.disabled = false;
-    //     }
-    // }
+    chatFormDOM.roomName.oninput = 
+    chatFormDOM.userName.oninput = function (event) {
+        let target = event.target;
+        if ( target.value.length < 3 || target.value.length > 50 )  {
+            chatFormDOM.nextButton.disabled = true;
+        } else {
+            chatFormDOM.nextButton.disabled = false;
+        }
+    }
 
 }
