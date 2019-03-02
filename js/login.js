@@ -174,14 +174,26 @@ class InputLinkState extends ChatStateBase{
 	}
 }
 
-window.onload = function () {
+
+function getLinkComponents() {
     let url = new URL(window.location.href);
     let key = url.searchParams.get("key");
 
-    let loginformDOMElem = document.getElementsByName("loginChat")[0];
+    return {
+        key,
+        url
+    };
+}
 
-    loginChatForm = new LoginChatForm(loginformDOMElem);
+function createChatFormObject(formDOM, linkComp) {
+    loginChatForm = new LoginChatForm(formDOM);
     let chatFormDOM = loginChatForm.formDOMElem;
+
+    chatFormSubmitListener(chatFormDOM, linkComp);
+    chatFormInputListener(chatFormDOM);
+}
+
+function chatFormSubmitListener(chatFormDOM, {key, url}) {
     if (key) {
         loginChatForm.inputRoom("exists",key,"GET");
     }
@@ -202,7 +214,9 @@ window.onload = function () {
         }
         return false;
     }
-    // // ВАЛИДАЦИЯ
+}
+
+function chatFormInputListener(chatFormDOM) {
     chatFormDOM.roomName.oninput = 
     chatFormDOM.userName.oninput = function (event) {
         let target = event.target;
@@ -212,5 +226,10 @@ window.onload = function () {
             chatFormDOM.nextButton.disabled = false;
         }
     }
+}
 
+window.onload = function () {
+    let linkComp  = getLinkComponents();
+    let loginformDOMElem = document.getElementsByName("loginChat")[0];
+    createChatFormObject(loginformDOMElem, linkComp);
 }

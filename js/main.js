@@ -1,4 +1,16 @@
 window.onload = function () {
+
+    var source = document.getElementById("entry-template").innerHTML;
+    var template = Handlebars.compile(source);
+
+    var context = {
+        messageType: "accept", 
+        nickname: "TRIKE94",
+        date: "01.01.1970",
+        time: "12:12",
+        text: "This is my first post!"
+    };
+    var html = template(context);
     
     let sessionData = loadSessionData();
     loadUserData(sessionData.username, sessionData.chatname);
@@ -126,10 +138,13 @@ function sendMEssageToServer(messageText, sessionData){
     let formData = new FormData();
     formData.append("text", messageText.value);
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", SettingController.getUrl()+"api/message/"+sessionData.key, true);
-    xhr.setRequestHeader("X-AUTH-TOKEN", sessionData.token);
-    xhr.send(formData);
+    let headers = new Headers();
+    headers.append("X-AUTH-TOKEN", sessionData.token)
+
+    fetch(SettingController.getUrl()+"api/message/"+sessionData.key, {
+        method: "POST", 
+        headers, 
+        body: formData})
 
     messageText.value = "";
 }
@@ -145,97 +160,92 @@ function showMissedMessage(state){
 }
 
 function getNewMessage(sessionData, lastMessageTime, messageList, state) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", SettingController.getUrl()+"api/message/"+sessionData.key, true);
-    xhr.setRequestHeader("X-AUTH-TOKEN", sessionData.token);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200)
-            {
-                try{
-                    function circ(timeFraction) {
-                        return 1 - Math.sin(Math.acos(timeFraction))
+
+    let headers = new Headers();
+    headers.append("X-AUTH-TOKEN", sessionData.token)
+
+    fetch(SettingController.getUrl()+"api/message/"+sessionData.key, {
+        method: "GET", 
+        headers})
+        .then( response => response.json(), 
+                reject => {
+                    if (state.islogOut == true) {
+                        return;
+                    } else {
+                        alert(`Возникла ошибка: ${reject.statusText}`);
                     }
-                    let smoothAnim = new SmoothAnimation({
-                        duration: 300,
-                        timing: circ,
-                        isEsaeOut: true
-                    })
+                })
+        .then( responJson => {
+            try{
+                function circ(timeFraction) {
+                    return 1 - Math.sin(Math.acos(timeFraction))
+                }
+                let smoothAnim = new SmoothAnimation({
+                    duration: 300,
+                    timing: circ,
+                    isEsaeOut: true
+                })
 
-                    let respObj = JSON.parse(xhr.responseText);
-                    let lastItem = respObj[respObj.length-1];
+                let lastItem = responJson[responJson.length-1];
 
-                    if (lastMessageTime != lastItem.id) {
-                        let message = new Message({
-                            username: lastItem.author,
-                            text: lastItem.text,
-                            time: lastItem.timecreated ,
-                            usernameFromToken: sessionData.username,
+                if (lastMessageTime != lastItem.id) {
+                    let message = new Message({
+                        username: lastItem.author,
+                        text: lastItem.text,
+                        time: lastItem.timecreated ,
+                        usernameFromToken: sessionData.username,
+                    });
+
+                    lastMessageTime = lastItem.id;
+
+                    messageList.appendChild(message.getElem());
+
+                    let from = messageList.scrollTop; 
+                    let to = messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight;
+                    smoothAnim.animate(function(progress) {
+                            progress = isNaN(progress) ? 0 : progress;
+                            messageList.scrollTop = from + to * progress ;
                         });
 
-                        lastMessageTime = lastItem.id;
-
-                        messageList.appendChild(message.getElem());
-
-                        let from = messageList.scrollTop; 
-                        let to = messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight;
-                        smoothAnim.animate(function(progress) {
-                                progress = isNaN(progress) ? 0 : progress;
-                                messageList.scrollTop = from + to * progress ;
-                            });
-
-                        showMissedMessage(state);
-                    }
-                } catch (e) {
-                    if (e.name !== "TypeError")
-                        alert(e);
+                    showMissedMessage(state);
                 }
-            } else {
-                if (state.islogOut == true) {
-                    xhr.abort();
-                    return;
-                } else {
-                    alert(`Возникла ошибка: ${xhr.status}`);
-                }
+            } catch (e) {
+                if (e.name !== "TypeError")
+                    alert(e);
             }
             getNewMessage(sessionData, lastMessageTime, messageList, state);
-        }
-    }
-    xhr.send();
+        })
 }
 
 function getAllMessage(sessionData, state) {
     let messageList = document.querySelector(".message-list");
     let lastMessageTime;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", SettingController.getUrl()+"api/message/"+sessionData.key, true);
-    xhr.setRequestHeader("X-AUTH-TOKEN", sessionData.token);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200)
-            {
-                let respObj = JSON.parse(xhr.responseText);
+    let headers = new Headers();
+    headers.append("X-AUTH-TOKEN", sessionData.token)
 
-                respObj.forEach(item => {
-                    let message = new Message({
-                        username: item.author,
-                        text: item.text,
-                        time: item.timecreated ,
-                        usernameFromToken: sessionStorage.getItem("username"),
-                    });
-
-                    lastMessageTime = item.id;
-
-                    messageList.appendChild(message.getElem());
-                    messageList.scrollTop  = messageList.scrollHeight;
+    fetch(SettingController.getUrl()+"api/message/"+sessionData.key, {
+        method: "GET", 
+        headers})
+        .then( response => response.json())
+        .then( responJson => {
+            responJson.forEach(item => {
+                let message = new Message({
+                    username: item.author,
+                    text: item.text,
+                    time: item.timecreated ,
+                    usernameFromToken: sessionStorage.getItem("username"),
                 });
 
-                getNewMessage(sessionData, lastMessageTime, messageList, state);
-            }
-        }
-    }
-    xhr.send();
+                lastMessageTime = item.id;
+
+                messageList.appendChild(message.getElem());
+                messageList.scrollTop  = messageList.scrollHeight;
+            });
+
+            getNewMessage(sessionData, lastMessageTime, messageList, state);
+        });
+
 }
 
 function loadSessionData() {

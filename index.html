@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/handlebars-v4.1.0.js"></script>
+    <script id="entry-template" type="text/x-handlebars-template">
+        <article class="{{messageType}} message depth-effect">
+            <header class="header-message">
+                <div class="about-info">
+                    <div class="nickname">{{nickname}}</div>
+                    <div class="date-time">
+                        <time class="time">{{time}}</time>
+                        <time class="date">{{date}}</time>
+                    </div>
+                </div>
+            </header>
+            <div class="text">
+                {{text}}
+            </div>
+        </article>
+    </script>
     <script src="js/settingController.js"></script>
     <script src="js/main.js"></script>
     <title>anonymchat</title>
@@ -45,19 +62,3 @@
     </main>
 </body>
 </html>
-
-
-<!-- <article class="accept message depth-effect">
-        <header class="header-message">
-            <div class="about-info">
-                <div class="nickname">Asylum29</div>
-                <div class="date-time">
-                    <time class="time">21:33</time>
-                    <time class="date">01.11.2018</time>
-                </div>
-            </div>
-        </header>
-        <div class="text">
-            Curabitur bibendum sollicitudin enim non aliquam. Pellentesque tristique feugiat mollis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos imenaeos.condimentum.
-        </div>
-    </article> -->
