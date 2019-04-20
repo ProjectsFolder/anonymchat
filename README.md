@@ -4,3 +4,5 @@
 + Написан на JavaScript, с применением шаблонизатора [handlebars.js](https://github.com/wycats/handlebars.js/).
 + В качестве сервера используется [данный репозиторий](https://github.com/SiberianTeletubbies/ChatAppBackend2).
 + Для правильной работы приложения, его необходимо запускать с сервера (например IIS, OpenServer).
+
+![](https://github.com/ProjectsFolder/anonymchat/blob/master/screenshot.PNG)
